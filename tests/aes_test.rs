@@ -955,7 +955,7 @@ fn test_lmbox() {
             0x2e,
         ];
     
-        let encr = crate::white_box::encryption_block(&key, &message);
+        let encr = crate::white_box::encryption_block( &message);
         let decrypt = crate::aes::decryption_block(&key, &encr);
     
         assert!(

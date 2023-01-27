@@ -1,5 +1,11 @@
-#![allow(dead_code)]
-use rand::Rng;
+
+
+mod intern {
+
+    #![allow(dead_code)]
+    use rand::Rng;
+    
+
 
 pub const SBOX: [u8; 256] = [
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -314,8 +320,8 @@ pub fn gf2_invertible_matrix_32() -> ([[u8; 32]; 32], [[u8; 32]; 32]) {
                 tmp[3] = [0, 0, 0, x];
 
                 for k in 0..4 {
-                    tmp[k] = crate::white_box::mul_m(&tmp[k], &mixing_bijection_m[1][r][j]);
-                    ml_tables[r][j][x_indice][k] = crate::white_box::mul_m(&tmp[k], &l);
+                    tmp[k] = mul_m(&tmp[k], &mixing_bijection_m[1][r][j]);
+                    ml_tables[r][j][x_indice][k] = mul_m(&tmp[k], &l);
                 }
             }
         }
@@ -732,23 +738,46 @@ pub fn expend_key(input: &mut [u8; 176], key: &[u8; 16]) {
     }
 }
 
-pub fn encryption_block(key: &[u8; 16], bytes: &[u8; 16]) -> [u8; 16] {
-    
+}
 
+
+pub use intern::{*}; // to modify ... 
+
+
+include!(concat!(env!("OUT_DIR"), "/keys.rs"));
+include!(concat!(env!("OUT_DIR"), "/tl_boxes.rs"));
+include!(concat!(env!("OUT_DIR"), "/tylm_boxes.rs"));
+include!(concat!(env!("OUT_DIR"), "/ml_box.rs"));
+include!(concat!(env!("OUT_DIR"), "/xor_table.rs"));
+include!(concat!(env!("OUT_DIR"), "/xor_ml_tables.rs"));
+
+
+// pub static  key: [u8; 16] = [
+//     0x47, 0x47, 0xf0, 0x09, 0x0e, 0x22, 0x77, 0xb3, 0xb6, 0x9a, 0x78, 0xe1, 0xe7, 0xcb, 0x9e,
+//     0x3f,
+// ];
+
+// static mut tl_boxes  : [[[u8; 256]; 16]; 10]= t_boxes(&key);
+
+
+
+// const l_box :[[[[[u8; 8]; 8]; 16]; 9]; 2] = mixing_bijection_l();
+// static m_box  : [[[[[u8; 32]; 32]; 4]; 9]; 2] = mixing_bijection_m();
+// static ml_box  : [[[[[u8; 4]; 4]; 256]; 4]; 9] = mixing_bijection_m_l(&m_box, &l_box);
+
+// static tylm_boxes  : [[[[[u8; 4]; 256]; 4]; 4]; 9] = tylm_tables(&mut tl_boxes, &l_box, &m_box);
+
+// static xor_ml_tables  :[[[[u8; 16]; 16]; 96]; 9]  = xor_tables();
+// static xor_table : [[[[u8; 16]; 16]; 96]; 9] = xor_tables();
+
+
+
+pub fn encryption_block( bytes: &[u8; 16]) -> [u8; 16] {
+    
     let mut state: [u8; 16] = *bytes;
 
 
-    let mut tl_boxes = t_boxes(&key);
 
-
-    let l_box = mixing_bijection_l();
-    let m_box = mixing_bijection_m();
-    let ml_box = mixing_bijection_m_l(&m_box, &l_box);
-
-    let tylm_boxes = tylm_tables(&mut tl_boxes, &l_box, &m_box);
-
-    let xor_ml_tables = xor_tables();
-    let xor_tables = xor_tables();
 
 
     for i in 0..9 {
@@ -762,9 +791,9 @@ pub fn encryption_block(key: &[u8; 16], bytes: &[u8; 16]) -> [u8; 16] {
                 ty_i[x] = tylm_boxes[i][g][x][state[g * 4 + x] as usize];
             }
 
-            let xor_ty_i_0 = xor_32b(i, g * 3, &xor_tables, &ty_i[0], &ty_i[1]);
-            let xor_ty_i_1 = xor_32b(i, g * 3 + 1, &xor_tables, &ty_i[2], &ty_i[3]);
-            let xor_result_ty_i = xor_32b(i, g * 3 + 2, &xor_tables, &xor_ty_i_0, &xor_ty_i_1);
+            let xor_ty_i_0 = xor_32b(i, g * 3, &xor_table, &ty_i[0], &ty_i[1]);
+            let xor_ty_i_1 = xor_32b(i, g * 3 + 1, &xor_table, &ty_i[2], &ty_i[3]);
+            let xor_result_ty_i = xor_32b(i, g * 3 + 2, &xor_table, &xor_ty_i_0, &xor_ty_i_1);
 
             for r in 0..4 {
                 tmp[r] = ml_box[i][g][xor_result_ty_i[r] as usize][r];
@@ -786,4 +815,5 @@ pub fn encryption_block(key: &[u8; 16], bytes: &[u8; 16]) -> [u8; 16] {
         state[i] = tl_boxes[9][i][state[i] as usize];
     }
     return  state;
+
 }
