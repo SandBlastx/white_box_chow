@@ -100,3 +100,30 @@ fn main() {
     }
 
 }
+
+#[cfg(test)]
+mod test{
+    use crate::api::{key ,encryption_block } ;
+    use aes_lib::{decryption_block};
+
+    #[test]
+    fn test_encryption_block_white_box() {
+        // let key: [u8; 16] = [
+        //     0x47, 0x47, 0xf0, 0x09, 0x0e, 0x22, 0x77, 0xb3, 0xb6, 0x9a, 0x78, 0xe1, 0xe7, 0xcb, 0x9e,
+        //     0x3f,
+        // ];
+        let message: [u8; 16] = [
+            0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x20, 0x3a, 0x29, 0x20,
+            0x2e,
+        ];
+    
+        let encr = encryption_block( &message);
+        let decrypt = decryption_block(&key, &encr);
+    
+        assert!(
+            message.iter().zip(decrypt.iter()).all(|(a, b)| a == b),
+            "Arrays are not equal"
+        );
+    }
+
+}
