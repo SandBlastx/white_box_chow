@@ -3,11 +3,10 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-#[path = "../src/aes.rs"]
-mod aes;
 
-#[path = "../src/white_box.rs"]
-mod white_box;
+
+mod api;
+use aes_lib ; 
 
 fn enc_buf(buf: &[u8], enc_type: &str, key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
     let mut buffer = [0u8; 16];
@@ -16,8 +15,8 @@ fn enc_buf(buf: &[u8], enc_type: &str, key: &[u8; 16]) -> Result<[u8; 16], & 'st
     }
 
     match enc_type {
-        "aes" => Ok(crate::aes::encryption_block(key, &buffer)),
-        "white_box" => Ok(crate::white_box::encryption_block(&buffer)),
+        "aes" => Ok(aes_lib::encryption_block(key, &buffer)),
+        "white_box" => Ok(api::encryption_block(&buffer)),
         _ => Err("Unkown encryption type use aes or white_box "),
     }
 }
@@ -35,7 +34,7 @@ fn read_file_buffer_enc(
     loop {
         let read_count = file.read(&mut buffer)?;
 
-        let buf = enc_buf(&buffer[..read_count], enc_type , &crate::white_box::key)?;
+        let buf = enc_buf(&buffer[..read_count], enc_type , &crate::api::key)?;
         file_enc.write_all(&buf)?;
         if read_count != BUFFER_LEN {
             break;
@@ -49,7 +48,7 @@ fn main() {
 
     let enc_type = &args[1];
     let file_path = &args[2];
-    let file_path_enc: String = String::from(file_path);
+    let mut file_path_enc: String = String::from(file_path);
     file_path_enc.push_str(".enc");
     let path = Path::new(file_path);
     let path_enc = Path::new(&file_path_enc);
