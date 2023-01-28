@@ -8,6 +8,16 @@ use std::path::Path;
 mod api;
 use aes_lib ; 
 
+fn dec_buf(buf: &[u8], key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
+    let mut buffer = [0u8; 16];
+    for i in 0..buf.len() {
+        buffer[i] = buf[i];
+    }
+
+     Ok(aes_lib::decryption_block(key ,&buffer))
+    
+}
+
 fn enc_buf(buf: &[u8], enc_type: &str, key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
     let mut buffer = [0u8; 16];
     for i in 0..buf.len() {
@@ -43,19 +53,50 @@ fn read_file_buffer_enc(
     Ok(())
 }
 
+
+
+fn read_file_buffer_dec(
+    filepath: &str,
+    filepathdec: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    const BUFFER_LEN: usize = 16;
+    let mut buffer = [0u8; BUFFER_LEN];
+    let mut file = File::open(filepath)?;
+    let mut file_dec = File::create(&filepathdec)?;
+
+    loop {
+        let read_count = file.read(&mut buffer)?;
+
+        let buf = dec_buf(&buffer[..read_count] , &crate::api::key)?;
+        file_dec.write_all(&buf)?;
+        if read_count != BUFFER_LEN {
+            break;
+        }   
+    }
+    Ok(())
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let enc_type = &args[1];
-    let file_path = &args[2];
+    if args.len() != 4 {
+        panic!("No engouh args")
+    }
+
+    let action = &args[1];
+    let enc_type = &args[2];
+    let file_path = &args[3];
+
     let mut file_path_enc: String = String::from(file_path);
     file_path_enc.push_str(".enc");
-    let path = Path::new(file_path);
-    let path_enc = Path::new(&file_path_enc);
+    let mut file_path_dec: String = String::from(file_path);
+    file_path_dec.push_str(".dec");
+    
 
+    match action.as_str() {
+        "enc" => {read_file_buffer_enc(&file_path, &file_path_enc, enc_type).unwrap() },
+        "dec" => {read_file_buffer_dec(&file_path, &file_path_dec).unwrap()},
+        _ => {panic!("Unkown action type use enc or dec ") },
+    }
 
-    match read_file_buffer_enc(&file_path, &file_path_enc, enc_type) {
-        Ok(_) => {},
-        Err(a) => {}, 
-    };
 }
