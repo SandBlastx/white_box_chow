@@ -3,10 +3,43 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use clap::{Parser , ValueEnum};
 
 
 mod api;
 use aes_lib ; 
+
+#[derive(ValueEnum, Clone , Debug)]
+enum Mode {
+    white_box,
+    classic
+    
+}
+#[derive(ValueEnum, Clone , Debug)]
+enum Action {
+    encrypt,
+    decrypt
+    
+}
+
+
+#[derive(Parser, Debug)]
+#[clap(author="aldu", version="1.0", about="White box AES-128 encryption implementation from Chow scheme", long_about = "White box AES-128 encryption implementation from Chow scheme. This is a univeristy project soo watch out to bugss :p")]
+struct Args {
+   /// Mode of the operation 
+   #[arg(short,long,required(true), value_enum)]
+   mode: Mode,
+   /// Action to perform   
+   #[arg(short, long, required(true), value_enum)]
+   action: Action,
+
+    /// file to operate
+   #[arg(short, long , required(true))]
+   file: String,
+
+   
+}
+
 
 fn dec_buf(buf: &[u8], key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
     let mut buffer = [0u8; 16];
@@ -18,15 +51,15 @@ fn dec_buf(buf: &[u8], key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
     
 }
 
-fn enc_buf(buf: &[u8], enc_type: &str, key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
+fn enc_buf(buf: &[u8], enc_type: &Mode, key: &[u8; 16]) -> Result<[u8; 16], & 'static  str> {
     let mut buffer = [0u8; 16];
     for i in 0..buf.len() {
         buffer[i] = buf[i];
     }
 
     match enc_type {
-        "aes" => Ok(aes_lib::encryption_block(key, &buffer)),
-        "white_box" => Ok(api::encryption_block(&buffer)),
+        Mode::classic => Ok(aes_lib::encryption_block(key, &buffer)),
+        Mode::white_box => Ok(api::encryption_block(&buffer)),
         _ => Err("Unkown encryption type use aes or white_box "),
     }
 }
@@ -34,7 +67,7 @@ fn enc_buf(buf: &[u8], enc_type: &str, key: &[u8; 16]) -> Result<[u8; 16], & 'st
 fn read_file_buffer_enc(
     filepath: &str,
     filepathenc: &str,
-    enc_type: &str,
+    enc_type: Mode,
 ) -> Result<(), Box<dyn std::error::Error>> {
     const BUFFER_LEN: usize = 16;
     let mut buffer = [0u8; BUFFER_LEN];
@@ -44,7 +77,7 @@ fn read_file_buffer_enc(
     loop {
         let read_count = file.read(&mut buffer)?;
 
-        let buf = enc_buf(&buffer[..read_count], enc_type , &crate::api::key)?;
+        let buf = enc_buf(&buffer[..read_count], &enc_type , &crate::api::key)?;
         file_enc.write_all(&buf)?;
         if read_count != BUFFER_LEN {
             break;
@@ -77,25 +110,22 @@ fn read_file_buffer_dec(
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args = Args::parse();
+    
 
-    if args.len() != 4 {
-        panic!("No engouh args")
-    }
+    let action = args.action;
+    let enc_type = args.mode;
+    let file_path = args.file;
 
-    let action = &args[1];
-    let enc_type = &args[2];
-    let file_path = &args[3];
-
-    let mut file_path_enc: String = String::from(file_path);
+    let mut file_path_enc: String = String::from(&file_path);
     file_path_enc.push_str(".enc");
-    let mut file_path_dec: String = String::from(file_path);
+    let mut file_path_dec: String = String::from(&file_path);
     file_path_dec.push_str(".dec");
     
 
-    match action.as_str() {
-        "enc" => {read_file_buffer_enc(&file_path, &file_path_enc, enc_type).unwrap() },
-        "dec" => {read_file_buffer_dec(&file_path, &file_path_dec).unwrap()},
+    match action {
+        Action::encrypt => {read_file_buffer_enc(&file_path, &file_path_enc, enc_type).unwrap() },
+        Action::decrypt => {read_file_buffer_dec(&file_path, &file_path_dec).unwrap()},
         _ => {panic!("Unkown action type use enc or dec ") },
     }
 

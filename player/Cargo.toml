@@ -12,5 +12,4 @@ white_box_lib = { path = "../white_box_lib" }
 [dependencies]
 aes_lib = { path = "../aes_lib" }
 white_box_lib = { path = "../white_box_lib" }
-
-
+clap = { version = "4.1.8", features = ["derive"] }

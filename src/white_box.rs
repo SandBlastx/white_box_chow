@@ -337,8 +337,8 @@ pub fn t_boxes(key: &[u8; 16]) -> [[[u8; 256]; 16]; 10] {
 
     for r in 0..10 {
         key_round = list_key[r * 16..(r + 1) * 16]
-            .try_into()
-            .expect("slice with incorrect length getting key round ");
+                .try_into()
+                .expect("slice with incorrect length getting key round ");
 
         if r == 9 {
             key_pr = list_key[(r + 1) * 16..(r + 2) * 16]
