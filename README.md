@@ -57,7 +57,12 @@ Before you can use this tool, ensure that you have the following prerequisites i
 ## Usage
 
 To change the AES-128 key, you can modify it in the player/build.rs
-
+```rust
+    let key: [u8; 16] =  [
+        0x34, 0x45, 0xf3, 0x19, 0x5e, 0x27, 0x89, 0x63, 0x96, 0x90, 0x38, 0x41, 0x77, 0x5c, 0xcc,
+        0xcf,
+    ];
+ ```
 
 To use the AES-128 whitebox encryption tool, you can run the following command:
 
