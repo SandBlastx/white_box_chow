@@ -24,7 +24,7 @@ This is a Rust implementation of the AES-128 whitebox encryption scheme, inspire
 - Command-line tool for easy operation.
 - Support for both white-box and classic AES-128 modes.
 - User-friendly input validation and error handling.
-- Highly modular and structured code for educational purposes.
+
 
 ## Getting Started
 
@@ -83,9 +83,5 @@ For example, to encrypt a file using the white-box mode, you can run:
 ```
 
 Make sure you have the necessary input files and follow the prompts.
-
-## Contributing
-
-If you would like to contribute to this project, feel free to open issues, create pull requests, or reach out to the project maintainer for further guidance.
 
 
