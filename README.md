@@ -16,7 +16,7 @@ This is a Rust implementation of the AES-128 whitebox encryption scheme, inspire
   - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
+
 
 ## Features
 
@@ -39,7 +39,7 @@ Before you can use this tool, ensure that you have the following prerequisites i
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-username/aes-128-whitebox.git
+   git clone https://github.com/SandBlastX/aes-128-whitebox.git
    ```
 
 2. Change to the project directory:
@@ -56,10 +56,13 @@ Before you can use this tool, ensure that you have the following prerequisites i
 
 ## Usage
 
+To change the AES-128 key, you can modify it in the player/build.rs
+
+
 To use the AES-128 whitebox encryption tool, you can run the following command:
 
 ```sh
-./aes-128-whitebox --mode MODE --action ACTION --file FILE
+./player --mode MODE --action ACTION --file FILE
 ```
 
 Replace the placeholders with the following values:
@@ -71,7 +74,7 @@ Replace the placeholders with the following values:
 For example, to encrypt a file using the white-box mode, you can run:
 
 ```sh
-./aes-128-whitebox --mode white_box --action encrypt --file input.txt
+./player --mode white_box --action encrypt --file input.txt
 ```
 
 Make sure you have the necessary input files and follow the prompts.
@@ -80,6 +83,4 @@ Make sure you have the necessary input files and follow the prompts.
 
 If you would like to contribute to this project, feel free to open issues, create pull requests, or reach out to the project maintainer for further guidance.
 
-## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
